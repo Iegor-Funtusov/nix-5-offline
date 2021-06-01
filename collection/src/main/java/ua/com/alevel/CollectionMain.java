@@ -11,7 +11,10 @@ public class CollectionMain {
 
         List<String> strings = Arrays.asList("q", "w", "e");
         List<String> list = strings.stream()
+                .distinct()
                 .filter(s -> s.equals("w"))
+                .sorted()
+                .skip(3)
                 .collect(Collectors.toList());
 
         System.out.println("list = " + list);
