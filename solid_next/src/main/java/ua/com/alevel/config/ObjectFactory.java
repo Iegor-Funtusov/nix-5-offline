@@ -1,35 +1,52 @@
 package ua.com.alevel.config;
 
-import org.reflections.Reflections;
+import ua.com.alevel.config.configure.ObjectConfigurator;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 public class ObjectFactory {
 
-    private static ObjectFactory instance;
-    private final Reflections reflections;
+    private final ApplicationContext context;
+    private final List<ObjectConfigurator> objectConfigurators;
 
-    private ObjectFactory() {
-        reflections = new Reflections("ua.com.alevel");
-    }
+    public ObjectFactory(ApplicationContext context) {
+        this.objectConfigurators = new ArrayList<>();
+        this.context = context;
 
-    public static ObjectFactory getInstance() {
-        if (instance == null) {
-            instance = new ObjectFactory();
-        }
-        return instance;
-    }
-
-    public <I> I getObjectImpl(Class<I> iClass) {
-        Set<Class<? extends I>> classes = reflections.getSubTypesOf(iClass);
-        for (Class<? extends I> aClass : classes) {
+        Set<Class<? extends ObjectConfigurator>> subTypesOf = this.context.getApplicationConfiguration().getScanner().getSubTypesOf(ObjectConfigurator.class);
+        for (Class<? extends ObjectConfigurator> aClass : subTypesOf) {
             try {
-                return aClass.getDeclaredConstructor().newInstance();
-            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                e.printStackTrace();
+                objectConfigurators.add(aClass.getDeclaredConstructor().newInstance());
+            } catch (Exception e) {
+                throw new RuntimeException(e.getMessage());
             }
         }
-        throw new RuntimeException("can not create object");
+    }
+
+    public <I> I createObject(Class<I> impl) {
+        I i;
+        try {
+            i = create(impl);
+            configure(i);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+        return i;
+    }
+
+    private <I> I create(Class<? extends I> impl) {
+        try {
+            return impl.getDeclaredConstructor().newInstance();
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+        throw new RuntimeException("can not create");
+    }
+
+    private <I> void configure(I i) {
+        objectConfigurators.forEach(objectConfigurator -> objectConfigurator.configure(i, context));
     }
 }
