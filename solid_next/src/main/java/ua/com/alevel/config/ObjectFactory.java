@@ -2,7 +2,9 @@ package ua.com.alevel.config;
 
 import ua.com.alevel.config.configure.ObjectConfigurator;
 
+import javax.annotation.PostConstruct;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -31,6 +33,7 @@ public class ObjectFactory {
         try {
             i = create(impl);
             configure(i);
+            invoke(impl, i);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
@@ -48,5 +51,14 @@ public class ObjectFactory {
 
     private <I> void configure(I i) {
         objectConfigurators.forEach(objectConfigurator -> objectConfigurator.configure(i, context));
+    }
+
+    private <I> void invoke(Class<I> type, I i) throws IllegalAccessException, InvocationTargetException {
+        for (Method method : type.getDeclaredMethods()) {
+            if (method.isAnnotationPresent(PostConstruct.class)) {
+                method.setAccessible(true);
+                method.invoke(i);
+            }
+        }
     }
 }
