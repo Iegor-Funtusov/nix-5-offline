@@ -1,9 +1,11 @@
 package ua.com.alevel.dao;
 
+import ua.com.alevel.config.annotation.Service;
 import ua.com.alevel.entity.User;
 
 import java.util.List;
 
+@Service
 public class UserDaoImpl implements UserDao {
 
     @Override

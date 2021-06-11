@@ -1,5 +1,6 @@
 package ua.com.alevel.entity;
 
+// POJO
 public class User {
 
     private long id;

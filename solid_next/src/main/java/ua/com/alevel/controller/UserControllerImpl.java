@@ -1,6 +1,7 @@
 package ua.com.alevel.controller;
 
-import ua.com.alevel.config.ObjectFactory;
+import ua.com.alevel.config.annotation.Autowired;
+import ua.com.alevel.config.annotation.Service;
 import ua.com.alevel.entity.User;
 import ua.com.alevel.service.UserService;
 
@@ -9,9 +10,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
 
+@Service
 public class UserControllerImpl implements UserController {
 
-    private UserService userService = ObjectFactory.getInstance().getObjectImpl(UserService.class);
+    @Autowired
+    private UserService userService;
 
     @Override
     public void start() {
