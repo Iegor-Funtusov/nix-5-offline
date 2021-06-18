@@ -1,10 +1,13 @@
 package ua.com.alevel.controller;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ua.com.alevel.entity.User;
 import ua.com.alevel.service.UserService;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("users")
@@ -57,5 +60,18 @@ public class UserController {
         user.setId(id);
         userService.update(user);
         return "redirect:/users";
+    }
+
+    @ResponseBody
+    @GetMapping("/json")
+    public ResponseEntity<List<User>> getUsers() {
+        return ResponseEntity.ok(userService.find());
+    }
+
+    @ResponseBody
+    @PostMapping("/json")
+    public ResponseEntity<Boolean> createUser(@RequestBody User user) {
+        userService.create(user);
+        return ResponseEntity.status(201).body(true);
     }
 }
